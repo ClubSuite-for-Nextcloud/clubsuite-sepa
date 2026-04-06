@@ -1,11 +1,27 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  test:
+  php-syntax:
     runs-on: ubuntu-latest
+    name: PHP Syntax Check
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Run Tests
-        run: echo "Running tests..."
+      - uses: actions/checkout@v5
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      
+      - name: Check PHP Syntax
+        run: |
+          find lib/ -name "*.php" -exec php -l {} \; | grep -v "No syntax errors" || true

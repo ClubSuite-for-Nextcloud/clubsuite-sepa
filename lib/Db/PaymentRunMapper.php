@@ -1,7 +1,7 @@
 <?php
 namespace OCA\ClubSuiteSepa\Db;
 
-use DateTime;
+use DateTimeImmutable;
 
 class PaymentRunMapper {
     private $connection;
@@ -14,7 +14,7 @@ class PaymentRunMapper {
         $stmt->execute();
         $res = [];
         while ($row = $stmt->fetch()) {
-            $r = new PaymentRunEntity(new DateTime($row['date']));
+            $r = new PaymentRunEntity(new DateTimeImmutable($row['date']));
             $r->setId((int)$row['id']);
             $r->setDescription($row['description'] ?? null);
             $res[] = $r;
@@ -38,7 +38,7 @@ class PaymentRunMapper {
         $stmt->execute([(int)$limit, (int)$offset]);
         $rows = [];
         while ($row = $stmt->fetch()) {
-            $r = new PaymentRunEntity(new DateTime($row['date']));
+            $r = new PaymentRunEntity(new DateTimeImmutable($row['date']));
             $r->setId((int)$row['id']);
             $r->setDescription($row['description'] ?? null);
             $rows[] = $r;
@@ -52,7 +52,7 @@ class PaymentRunMapper {
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         if (!$row) return null;
-        $r = new PaymentRunEntity(new DateTime($row['date']));
+        $r = new PaymentRunEntity(new DateTimeImmutable($row['date']));
         $r->setId((int)$row['id']);
         $r->setDescription($row['description'] ?? null);
         return $r;

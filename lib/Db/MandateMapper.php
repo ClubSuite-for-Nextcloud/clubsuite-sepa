@@ -15,7 +15,7 @@ class MandateMapper {
             $m = new MandateEntity($row['user_id'], $row['iban'], $row['mandate_id']);
             $m->setId((int)$row['id']);
             $m->setBic($row['bic'] ?? null);
-            if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTime($row['signature_date']));
+            if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTimeImmutable($row['signature_date']));
             $res[] = $m;
         }
         return $res;
@@ -41,7 +41,7 @@ class MandateMapper {
             $m = new MandateEntity($row['user_id'], $row['iban'], $row['mandate_id']);
             $m->setId((int)$row['id']);
             $m->setBic($row['bic'] ?? null);
-            if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTime($row['signature_date']));
+            if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTimeImmutable($row['signature_date']));
             $rows[] = $m;
         }
         return ['total'=>$total,'rows'=>$rows];
@@ -56,16 +56,21 @@ class MandateMapper {
         $m = new MandateEntity($row['user_id'], $row['iban'], $row['mandate_id']);
         $m->setId((int)$row['id']);
         $m->setBic($row['bic'] ?? null);
-        if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTime($row['signature_date']));
+        if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTimeImmutable($row['signature_date']));
         return $m;
     }
 
-    public function create(MandateEntity $m): int {
-        $sql = 'INSERT INTO `*PREFIX*sepa_mandate` (`user_id`,`iban`,`bic`,`mandate_id`,`signature_date`) VALUES (?,?,?,?,?)';
-        $this->connection->prepare($sql)->execute([
-            $m->getUserId(), $m->getIban(), $m->getBic(), $m->getMandateId(), $m->getSignatureDate()?->format('Y-m-d')
-        ]);
-        return (int)$this->connection->lastInsertId();
+    public function findByUserId(string $userId): ?MandateEntity {
+        $sql = 'SELECT * FROM `*PREFIX*sepa_mandate` WHERE `user_id` = ? AND `status` = \'active\' LIMIT 1';
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        if (!$row) return null;
+        $m = new MandateEntity($row['user_id'], $row['iban'], $row['mandate_id']);
+        $m->setId((int)$row['id']);
+        $m->setBic($row['bic'] ?? null);
+        if (!empty($row['signature_date'])) $m->setSignatureDate(new \DateTimeImmutable($row['signature_date']));
+        return $m;
     }
 
     public function delete(int $id): void {
